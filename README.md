@@ -1,18 +1,11 @@
-# Bayesian-Habit-Tracking
+# Bayesian Habit Tracking
+Autoregressive Poisson model with examples
 
-\title{Bayesian Habit Tracking}
-\author{Autoregressive Poisson model with examples}
-\date{}
-
-\begin{document}
-
-\maketitle
-
-\section*{Premise}
+**Premise**
 
 Each week I count how many instances of bad habits I engage in. These instances are defined by units, such as consuming 60 milligrams of caffeine.
 
-\section*{4-week AR(4) model}
+**4-week AR(4) model**
 
 Let $y$ be instances of bad habits for a given week.
 
@@ -38,7 +31,7 @@ $$
 \end{bmatrix}
 $$
 
-\subsection*{Log link}
+**Log link**
 
 We translate $y_t$ to ensure $\mu_t$ is strictly positive, then apply a log transform.
 
@@ -46,7 +39,7 @@ $$
 \log(\mu_t) = \alpha + \sum_{i=1}^{4}\rho_i\log(y_{t-i}+1)
 $$
 
-\subsection*{Initial priors}
+**Initial priors**
 
 $$
 \alpha \sim \text{Normal}(\mu = 0, \sigma_\alpha^2 = 4) \\
@@ -73,14 +66,14 @@ $$
 \{\alpha,\rho_1,\rho_2,\rho_3,\rho_4\} \sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
 $$
 
-\subsection*{Density}
+**Density**
 
 $$
 P(\theta) = \frac{1}{\sqrt{(2\pi)^5 \begin{vmatrix} \Sigma_{\text{prior}} \end{vmatrix}}}
 \exp\left(-\frac{1}{2}(\theta - \mu_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}^{-1}(\theta - \mu_{\text{prior}})\right)
 $$
 
-\subsection*{Likelihood}
+**Likelihood**
 
 $$
 L(\theta) = \prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}
@@ -92,15 +85,15 @@ $$
 \ell(\theta) = \log\left(\prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}\right) = \sum_{t=5}^{n}y_t\log(\mu_t) - \mu_t - \log_(y_t)!
 $$
 
-\subsection*{Posterior}
+**Posterior**
 
 $$
 \log(P(\theta)) = \sum_{t=5}^{n}(y_t\log(\mu_t)-\mu_t - \log(y_t!)) - \frac{1}{2}(\theta - \mu_{prior})^{\mathrm{T}}\Sigma_{prior}^{-1}(\theta-\mu_{prior}) + c
 $$
 
-\section*{Markov Chain Monte Carlo}
+**Markov Chain Monte Carlo**
 
-\subsection*{Partial Autocorrelation Function}
+**Partial Autocorrelation Function**
 
 Let $\hat{y}_{t+k}$ and $\hat{y}_t$ be linear combinations of
 
@@ -120,12 +113,10 @@ $$
 \phi_{n,k} = \phi_{n-1,k} - \phi_{n,n}\phi_{n-1,n-k} \quad \text{for} \ 1 \le k \le n - 1
 $$
 
-\subsection*{Durbin-Levinson Algorithm}
+**Durbin-Levinson Algorithm**
 
 The partial autocorrelation of $y_t$ is calculated by
 
 $$
 \phi_{n,n} = \frac{f(n)-\sum_{k-1}^{n-1}\phi_{n-1,k}f(n-k)}{1-\sum_{k=1}^{n-1}\phi_{n-1,k}f(k)}
 $$
-
-\end{document}
