@@ -45,15 +45,24 @@ $$
 \mu_{\text{prior}}^{\mathrm{T}} &=
 \begin{bmatrix}
 \mu_\alpha & \mu_{\rho 1} & \mu_{\rho 2} & \mu_{\rho 3} & 0
-\end{bmatrix} \\
-\Sigma_{\text{prior}}^{\mathrm{T}} &= \text{diag}(4,1,1,1,1) \\
+\end{bmatrix}
+$$
+
+$$
+\Sigma_{\text{prior}}^{\mathrm{T}} &= \text{diag}(4,1,1,1,1)
+$$
+
+$$
 \{\alpha,\psi_1,\psi_2,\psi_3,\psi_4\} &\sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
 $$
 
 **Initial priors**
 
 $$
-\alpha \sim \text{Normal}(\mu = 0, \sigma_\alpha^2 = 4) \\
+\alpha \sim \text{Normal}(\mu = 0, \sigma_\alpha^2 = 4)
+$$
+
+$$
 \psi_1,\psi_2,\psi_3,\psi_4, \sim \text{Normal}(\mu = 0, \sigma_\rho^2 = 1)
 $$
 
