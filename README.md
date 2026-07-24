@@ -27,7 +27,7 @@ Let $\theta$ be the unknown parameters
 $$
 \theta^{\mathrm{T}} =
 \begin{bmatrix}
-\alpha & \rho_1 & \rho_2 & \rho_3 & \rho_4
+\alpha & \psi_1 & \psi_2 & \psi_3 & \psi_4
 \end{bmatrix}
 $$
 
@@ -36,34 +36,25 @@ $$
 We translate $y_t$ to ensure $\mu_t$ is strictly positive, then apply a log transform.
 
 $$
-\log(\mu_t) = \alpha + \sum_{i=1}^{4}\rho_i\log(y_{t-i}+1)
+\log(\mu_t) = \alpha + \sum_{i=1}^{4}\psi_i\log(y_{t-i}+1)
+$$
+
+**Priors**
+
+$$
+\mu_{\text{prior}}^{\mathrm{T}} &=
+\begin{bmatrix}
+\mu_\alpha & \mu_{\rho 1} & \mu_{\rho 2} & \mu_{\rho 3} & 0
+\end{bmatrix} \\
+\Sigma_{\text{prior}}^{\mathrm{T}} &= \text{diag}(4,1,1,1,1) \\
+\{\alpha,\psi_1,\psi_2,\psi_3,\psi_4\} &\sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
 $$
 
 **Initial priors**
 
 $$
 \alpha \sim \text{Normal}(\mu = 0, \sigma_\alpha^2 = 4) \\
-\rho_1,\rho_2,\rho_3,\rho_4, \sim \text{Normal}(\mu = 0, \sigma_\rho^2 = 1) 
-$$
-
-$$
-\mu_{\text{prior}}^{\mathrm{T}} =
-\begin{bmatrix}
-\mu_\alpha & \mu_{\rho 1} & \mu_{\rho 2} & \mu_{\rho 3} & 0
-\end{bmatrix}
-, \quad
-\Sigma_{\text{prior}}^{\mathrm{T}} =
-\begin{bmatrix}
-\text{Var}(\alpha) & \text{Cov}(\alpha,\rho_1) & \text{Cov}(\alpha,\rho_2) & \text{Cov}(\alpha,\rho_3) & 0 \\
-\text{Cov}(\rho_1,\alpha) & \text{Var}(\rho_1) & \text{Cov}(\rho_1,\rho_2) & \text{Cov}(\rho_1,\rho_3) & 0 \\
-\text{Cov}(\rho_2,\alpha) & \text{Cov}(\rho_2,\rho_1) & \text{Var}(\rho_2) & \text{Cov}(\rho_2,\rho_3) & 0 \\
-\text{Cov}(\rho_3,\alpha) & \text{Cov}(\rho_3,\rho_1) & \text{Cov}(\rho_3,\rho_2) & \text{Var}(\rho_3) & 0 \\
-0 & 0 & 0 & 0 & 1
-\end{bmatrix}
-$$
-
-$$
-\{\alpha,\rho_1,\rho_2,\rho_3,\rho_4\} \sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
+\psi_1,\psi_2,\psi_3,\psi_4, \sim \text{Normal}(\mu = 0, \sigma_\rho^2 = 1)
 $$
 
 **Density**
@@ -82,14 +73,16 @@ $$
 Therefore the log likelihood $\ell(\theta)$ is give by
 
 $$
-\ell(\theta) = \log\left(\prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}\right) = \sum_{t=5}^{n}y_t\log(\mu_t) - \mu_t - \log_(y_t)!
+\ell(\theta) = \log\left(\prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}\right) = \sum_{t=5}^{n}y_t\log(\mu_t) - \mu_t - \log(y_t!)
 $$
 
 **Posterior**
 
 $$
-\log(P(\theta)) = \sum_{t=5}^{n}(y_t\log(\mu_t)-\mu_t - \log(y_t!)) - \frac{1}{2}(\theta - \mu_{prior})^{\mathrm{T}}\Sigma_{prior}^{-1}(\theta-\mu_{prior}) + c
+\log(P(\theta)) = \sum_{t=5}^{n}(y_t\log(\mu_t)-\mu_t - \log(y_t!)) - \frac{1}{2}(\theta - \mu_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}^{-1}(\theta-\mu_{\text{prior}}) + c
 $$
+
+for some constant $c$.
 
 **Markov Chain Monte Carlo**
 
@@ -107,16 +100,17 @@ $$
 \phi_{k,k} = \text{corr}(y_{t+k}-\hat{y}_{t+k}, y_t - \hat{y}_t) \quad \text{for} \ k \ge 2
 $$
 
-Similarly,
-
-$$
-\phi_{n,k} = \phi_{n-1,k} - \phi_{n,n}\phi_{n-1,n-k} \quad \text{for} \ 1 \le k \le n - 1
-$$
-
 **Durbin-Levinson Algorithm**
 
-The partial autocorrelation of $y_t$ is calculated by
+$$
+\phi_{n,k} = \phi_{n-1,k} - \phi_{n,n}\phi_{n-1,n-k}, \quad k = 1,2,3,4
+$$
+
+Let $\phi_{1,1} = \tanh(\psi_1)$. We define $\rho_i = \phi_{4,i}$
 
 $$
-\phi_{n,n} = \frac{f(n)-\sum_{k-1}^{n-1}\phi_{n-1,k}f(n-k)}{1-\sum_{k=1}^{n-1}\phi_{n-1,k}f(k)}
+\phi_{1,1} &= \tanh(\psi_1) \\
+\phi_{2,2} &= \tanh(\psi_2), \quad \phi_{2,1} = \phi_{1,1} - \phi_{2,2}\phi_{1,1} \\
+\phi_{3,3} &= \tanh(\psi_3), \quad \phi_{3,1} = \phi_{2,1} - \phi_{3,3}\phi_{2,2}, \quad \phi_{3,2} = \phi_{2,2} - \phi_{3,3}\phi_{2,1} \\
+\phi_{4,4} &= \tanh(\psi_4), \quad \phi_{4,1} = \phi_{3,1} - \phi_{4,4}\phi_{3,3}, \quad \phi_{4,2} = \phi_{3,2} - \phi_{4,4}\phi_{3,2}, \quad \phi_{4,3} = \phi_{3,3} - \phi_{4,4}\phi_{3,1}
 $$
