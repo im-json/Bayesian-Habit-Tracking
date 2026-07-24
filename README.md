@@ -7,10 +7,10 @@ Each week I count how many instances of bad habits I engage in. These instances 
 
 **4-week AR(4) model**
 
-Let $y$ be instances of bad habits for a given week.
+Let $y_i$ be instances of bad habits for a given week.
 
 $$
-y^{\mathrm{T}} =
+y_i^{\mathrm{T}} =
 \begin{bmatrix}
 7 & 6 & 0 & 0 & 0 & 0 & 4 & 1 & 1 & 0
 \end{bmatrix}
