@@ -53,7 +53,7 @@ $$
 $$
 
 $$
-\{\alpha,\psi_1,\psi_2,\psi_3,\psi_4\} &\sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
+\{\alpha,\psi_1,\psi_2,\psi_3,\psi_4\} \sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
 $$
 
 **Initial priors**
