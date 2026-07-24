@@ -129,5 +129,6 @@ $$
 \phi_{3,3} = \tanh(\psi_3), \quad \phi_{3,1} = \phi_{2,1} - \phi_{3,3}\phi_{2,2}, \quad \phi_{3,2} = \phi_{2,2} - \phi_{3,3}\phi_{2,1}
 $$
 
+$$
 \phi_{4,4} = \tanh(\psi_4), \quad \phi_{4,1} = \phi_{3,1} - \phi_{4,4}\phi_{3,3}, \quad \phi_{4,2} = \phi_{3,2} - \phi_{4,4}\phi_{3,2}, \quad \phi_{4,3} = \phi_{3,3} - \phi_{4,4}\phi_{3,1}
 $$
