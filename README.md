@@ -7,28 +7,92 @@ Each week I count how many instances of bad habits I engage in. These instances 
 
 **4-week AR(4) model**
 
-Let $y_i$ be instances of bad habits for a given week.
+Let $y_t \in \mathbb{Z}_{\ge 0}^5$ be instances of 5 different bad habits for week $t$. For a 4-week model, $p=4$.
 
 $$
-y_i^{\mathrm{T}} =
+y_t^{\mathrm{T}} =
 \begin{bmatrix}
-7 & 6 & 0 & 0 & 0 & 0 & 4 & 1 & 1 & 0
+7 & 6 & 0 & 4 & 0
 \end{bmatrix}
 $$
 
-We assume $y$ follows a Poisson distribution for week $t$ with mean $\mu$
+Let $\Psi_{a,b}$ be the lag coefficients $\psi$ between habit $a$ and habit $b$ for each week.
 
 $$
-y_t \sim \text{Poisson}(\mu_t)
-$$
-
-Let $\theta$ be the unknown parameters
-
-$$
-\theta^{\mathrm{T}} =
+\Psi_{a,b} =
 \begin{bmatrix}
-\alpha & \psi_1 & \psi_2 & \psi_3 & \psi_4
+\psi_{1,ab} & \psi_{2,ab} & \psi_{3,ab} & \psi_{4,ab}
 \end{bmatrix}
+$$
+
+Let $\theta_j$ be the 21 unknown parameters for a given habit $j$.
+
+$$
+\theta_j^{\mathrm{T}} =
+\begin{bmatrix}
+\alpha_j & \Psi_{j,j} & \Psi_{j,k_1} & \Psi_{j,k_2} & \Psi_{j,k_3} & \Psi_{j,k_4}
+\end{bmatrix}
+, \quad
+\{k_1,k_2,k_3,k_4\} = \{1,\dots,5\} \setminus \{j\}
+$$
+
+We assume $y_{t,j}$ follows a Poisson distribution for week $t$ and habit $j$ with mean $\mu_{t,j}$
+
+$$
+y_{t,j} \sim \text{Poisson}(\mu_{t,j})
+$$
+
+**Priors**
+
+$$
+\mu_{\text{prior}} = \mathbf{0}_{21}
+$$
+
+**Hyperprior**
+
+$$
+\tau_j \sim \text{Half-Cauchy}(0,s)
+$$
+
+$$
+p(\tau_j) = \frac{2}{\pi s\big(1 + (\tau_j/s)^2\big)}, \quad \tau_j > 0
+$$
+
+$$
+\log\left(\frac{2}{\pi s\big(1 + (\tau_j/s)^2\big)}\right) = \log\left(\frac{2}{\pi s}\right) - \log\left(1 + \frac{\tau_j^2}{s^2}\right)
+$$
+
+**Distributions**
+
+$$
+\alpha_j \sim \text{Normal}(0,4), \quad \Psi_{j,j} \sim \text{Normal}(0,1)
+$$
+
+$$
+\Psi_{j,k_1},\dots,\Psi_{j,k_4} \mid \tau_j \sim \text{Normal}\big(0,\tau_j^2\big), \quad \theta_j \mid \tau_j \sim \text{MultivariateNormal}\big(\mathbf{0}_{21},\Sigma_{\text{prior}}(\tau_j)\big)
+$$
+
+**Covariance**
+
+$$
+\Sigma_{\text{prior}}(\tau_j) = \text{diag}\big(4,\underbrace{1,1,1,1}_4,\underbrace{\tau_j^2,\dots,\tau_j^2}_{16}\big), \quad \Sigma_{\text{prior}}(\tau_j)^{-1} = \text{diag}\big(0.25,\underbrace{1,1,1,1}_4,\underbrace{\tau_j^{-2},\dots,\tau_j^{-2}}_{16}\big)
+$$
+
+$$
+\begin{vmatrix}
+\Sigma_{\text{prior}}(\tau_j)
+\end{vmatrix}
+= 4\tau_j^{32}
+$$
+
+**Density**
+
+$$
+P(\theta_j \mid \tau_j) = \frac{1}{\sqrt{(2\pi)^{21}
+\begin{vmatrix}
+\Sigma_{\text{prior}}(\tau_j)
+\end{vmatrix}}}
+\exp\left(-\frac{1}{2}\theta_j^{\text{T}}\Sigma_{\text{prior}}(\tau_j)^{-1}\theta_j\right)
 $$
 
 **Log link**
@@ -36,99 +100,39 @@ $$
 We translate $y_t$ to ensure $\mu_t$ is strictly positive, then apply a log transform.
 
 $$
-\log(\mu_t) = \alpha + \sum_{i=1}^{4}\psi_i\log(y_{t-i}+1)
+\log(\mu_{t,j}) = \alpha_j + \sum_{i=1}^{4}\psi_{i,jj}\log(y_{t-i,j}+1) + \sum_{k \ne j}\sum_{i=1}^{4}\psi_{i,jk}\log(y_{t-i,k}+1)
 $$
 
-**Priors**
+**Log Likelihood**
+
+The likelihood function $L(\theta_j)$ is given by
 
 $$
-\mu_{\text{prior}}^{\mathrm{T}} =
-\begin{bmatrix}
-\mu_\alpha & \mu_{\rho 1} & \mu_{\rho 2} & \mu_{\rho 3} & 0
-\end{bmatrix}
+L(\theta_j) = \prod_{t=5}^{n}\frac{\mu_{t,j}^{y_{t,j}}e^{-\mu_{t,j}}}{y_{t,j}!}
+$$
+
+Therefore the log likelihood $\ell(\theta_j)$ is given by
+
+$$
+\ell(\theta_j) = \log\left(\prod_{t=5}^{n}\frac{\mu_{t,j}^{y_{t,j}}e^{-\mu_{t,j}}}{y_{t,j}!}\right) = \sum_{t=5}^{n}\big(y_{t,j}\log(\mu_{t,j}) - \mu_{t,j} - \log(y_{t,j}!)\big)
+$$
+
+**Log Posterior**
+
+$$
+\log\big(P(\theta_j,\tau_j) \mid y\big) = \ell(\theta_j) - \frac{1}{2}(\theta_j - \mu_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}(\tau_j)^{-1}(\theta_j - \mu_{\text{prior}}) - \frac{1}{2}\log\big(
+\begin{vmatrix}
+\Sigma_{\text{prior}}(\tau_j)
+\end{vmatrix}
+\big) + \log\big(p(\tau_j)\big) + c
 $$
 
 $$
-\Sigma_{\text{prior}}^{\mathrm{T}} = \text{diag}(4,1,1,1,1)
+= \ell(\theta_j) - \frac{1}{2}\theta_j^{\mathrm{T}}\Sigma_{\text{prior}}(\tau_j)^{-1}\theta_j - \frac{1}{2}\log\big(4\tau_j^{32}\big) + \log\left(\frac{2}{\pi s\big(1 + (\tau_j/s)^2\big)}\right) + c
 $$
 
 $$
-\{\alpha,\psi_1,\psi_2,\psi_3,\psi_4\} \sim \text{MultivariateNormal}(\mu_{\text{prior}},\Sigma_{\text{prior}})
-$$
-
-**Initial priors**
-
-$$
-\alpha \sim \text{Normal}(\mu = 0, \sigma_\alpha^2 = 4)
-$$
-
-$$
-\psi_1,\psi_2,\psi_3,\psi_4, \sim \text{Normal}(\mu = 0, \sigma_\rho^2 = 1)
-$$
-
-**Density**
-
-$$
-P(\theta) = \frac{1}{\sqrt{(2\pi)^5 \begin{vmatrix} \Sigma_{\text{prior}} \end{vmatrix}}}
-\exp\left(-\frac{1}{2}(\theta - \mu_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}^{-1}(\theta - \mu_{\text{prior}})\right)
-$$
-
-**Likelihood**
-
-$$
-L(\theta) = \prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}
-$$
-
-Therefore the log likelihood $\ell(\theta)$ is give by
-
-$$
-\ell(\theta) = \log\left(\prod_{t=5}^{n}\frac{\mu_t^{y_t}e^{-\mu_t}}{y_t!}\right) = \sum_{t=5}^{n}y_t\log(\mu_t) - \mu_t - \log(y_t!)
-$$
-
-**Posterior**
-
-$$
-\log(P(\theta)) = \sum_{t=5}^{n}(y_t\log(\mu_t)-\mu_t - \log(y_t!)) - \frac{1}{2}(\theta - \mu_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}^{-1}(\theta-\mu_{\text{prior}}) + c
+= \ell(\theta_j) - \frac{\alpha_j^2}{8} - \frac{1}{2}\sum_{i=1}^4\psi_{i,jj}^2 - \frac{1}{2\tau_j^2}\sum_{k \ne j}\sum_{i=1}^4\psi_{i,jk}^2 - \log\left(\tau_j^{16}\left(1 + \frac{\tau_j^2}{s^2}\right)\right) + c
 $$
 
 for some constant $c$.
-
-**Markov Chain Monte Carlo**
-
-**Partial Autocorrelation Function**
-
-Let $\hat{y}_{t+k}$ and $\hat{y}_t$ be linear combinations of
-
-$$
-\{y_{t+1},y_{t+2},\dots,y_{t+k-1}\}
-$$
-
-The partial autocorrelation of lag $k$ is given by
-
-$$
-\phi_{k,k} = \text{corr}(y_{t+k}-\hat{y}_{t+k}, y_t - \hat{y}_t) \quad \text{for} \ k \ge 2
-$$
-
-**Durbin-Levinson Algorithm**
-
-$$
-\phi_{n,k} = \phi_{n-1,k} - \phi_{n,n}\phi_{n-1,n-k}, \quad k = 1,2,3,4
-$$
-
-Let $\phi_{1,1} = \tanh(\psi_1)$. We define $\rho_i = \phi_{4,i}$
-
-$$
-\phi_{1,1} = \tanh(\psi_1)
-$$
-
-$$
-\phi_{2,2} = \tanh(\psi_2), \quad \phi_{2,1} = \phi_{1,1} - \phi_{2,2}\phi_{1,1}
-$$
-
-$$
-\phi_{3,3} = \tanh(\psi_3), \quad \phi_{3,1} = \phi_{2,1} - \phi_{3,3}\phi_{2,2}, \quad \phi_{3,2} = \phi_{2,2} - \phi_{3,3}\phi_{2,1}
-$$
-
-$$
-\phi_{4,4} = \tanh(\psi_4), \quad \phi_{4,1} = \phi_{3,1} - \phi_{4,4}\phi_{3,3}, \quad \phi_{4,2} = \phi_{3,2} - \phi_{4,4}\phi_{3,2}, \quad \phi_{4,3} = \phi_{3,3} - \phi_{4,4}\phi_{3,1}
-$$
