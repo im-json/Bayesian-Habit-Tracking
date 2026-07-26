@@ -82,7 +82,7 @@ $$
 \begin{vmatrix}
 \Sigma_{\text{prior}}(\gamma_j)
 \end{vmatrix}
-= 4\gamma_j^{32}
+= \prod_{i=1}^{21} \sigma_{\text{prior}}(\gamma_j)_{ii} = 4\gamma_j^{32}
 $$
 
 **Density**
