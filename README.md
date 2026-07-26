@@ -16,12 +16,12 @@ y_t^{\mathrm{T}} =
 \end{bmatrix}
 $$
 
-Let $\Phi_{a,b}$ be the lag coefficients $\phi$ between habit $a$ and habit $b$ for each week.
+Let $B_{a,b}$ be the lag coefficients $\beta$ between habit $a$ and habit $b$ for each week.
 
 $$
-\Phi_{a,b} =
+B_{a,b} =
 \begin{bmatrix}
-\phi_{1,ab} & \phi_{2,ab} & \phi_{3,ab} & \phi_{4,ab}
+\beta_{1,ab} & \beta_{2,ab} & \beta_{3,ab} & \beta_{4,ab}
 \end{bmatrix}
 $$
 
@@ -30,7 +30,7 @@ Let $\theta_j$ be the 21 unknown parameters for a given habit $j$.
 $$
 \theta_j^{\mathrm{T}} =
 \begin{bmatrix}
-\alpha_j & \Phi_{j,j} & \Phi_{j,k_1} & \Phi_{j,k_2} & \Phi_{j,k_3} & \Phi_{j,k_4}
+\alpha_j & B_{j,j} & B_{j,k_1} & B_{j,k_2} & B_{j,k_3} & B_{j,k_4}
 \end{bmatrix}
 , \quad
 \\{k_1,k_2,k_3,k_4\\} = \\{1,\dots,5\\} \setminus \\{j\\}
@@ -65,11 +65,11 @@ $$
 **Distributions**
 
 $$
-\alpha_j \sim \text{Normal}(0,4), \quad \Phi_{j,j} \sim \text{Normal}(0,1)
+\alpha_j \sim \text{Normal}(0,4), \quad B_{j,j} \sim \text{Normal}(0,1)
 $$
 
 $$
-\Phi_{j,k_1},\dots,\Phi_{j,k_4} \mid \gamma_j \sim \text{Normal}\big(0,\gamma_j^2\big), \quad \theta_j \mid \gamma_j \sim \text{MultivariateNormal}\big(\mathbf{0}_{21},\Sigma_{\text{prior}}(\gamma_j)\big)
+B_{j,k_1},\dots,B_{j,k_4} \mid \gamma_j \sim \text{Normal}\big(0,\gamma_j^2\big), \quad \theta_j \mid \gamma_j \sim \text{MultivariateNormal}\big(\mathbf{0}_{21},\Sigma_{\text{prior}}(\gamma_j)\big)
 $$
 
 **Covariance**
@@ -100,7 +100,7 @@ $$
 We translate $y_t$ to ensure $\lambda_t$ is strictly positive, then apply a log transform.
 
 $$
-\log(\lambda_{t,j}) = \alpha_j + \sum_{i=1}^{4}\phi_{i,jj}\log(y_{t-i,j}+1) + \sum_{k \ne j}\sum_{i=1}^{4}\phi_{i,jk}\log(y_{t-i,k}+1)
+\log(\lambda_{t,j}) = \alpha_j + \sum_{i=1}^{4}\beta_{i,jj}\log(y_{t-i,j}+1) + \sum_{k \ne j}\sum_{i=1}^{4}\beta_{i,jk}\log(y_{t-i,k}+1)
 $$
 
 **Log Likelihood**
@@ -132,7 +132,7 @@ $$
 $$
 
 $$
-= \ell(\theta_j) - \frac{\alpha_j^2}{8} - \frac{1}{2}\sum_{i=1}^4\phi_{i,jj}^2 - \frac{1}{2\gamma_j^2}\sum_{k \ne j}\sum_{i=1}^4\phi_{i,jk}^2 - \log\left(\gamma_j^{16}\left(1 + \frac{\gamma_j^2}{s^2}\right)\right) + c
+= \ell(\theta_j) - \frac{\alpha_j^2}{8} - \frac{1}{2}\sum_{i=1}^4\beta_{i,jj}^2 - \frac{1}{2\gamma_j^2}\sum_{k \ne j}\sum_{i=1}^4\beta_{i,jk}^2 - \log\left(\gamma_j^{16}\left(1 + \frac{\gamma_j^2}{s^2}\right)\right) + c
 $$
 
 for some constant $c$.
