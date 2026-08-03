@@ -120,19 +120,15 @@ $$
 **Log Posterior**
 
 $$
-\log\big(P(\theta_j,\gamma_j) \mid y\big) = \ell(\theta_j) - \frac{1}{2}(\theta_j - \lambda_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}(\gamma_j)^{-1}(\theta_j - \lambda_{\text{prior}}) - \frac{1}{2}\log\big(
+\begin{aligned}
+\log\big(P(\theta_j,\gamma_j) \mid y\big) &= \ell(\theta_j) - \frac{1}{2}(\theta_j - \lambda_{\text{prior}})^{\mathrm{T}}\Sigma_{\text{prior}}(\gamma_j)^{-1}(\theta_j - \lambda_{\text{prior}}) - \frac{1}{2}\log\big(
 \begin{vmatrix}
 \Sigma_{\text{prior}}(\gamma_j)
 \end{vmatrix}
-\big) + \log\big(p(\gamma_j)\big) + c
-$$
-
-$$
-= \ell(\theta_j) - \frac{1}{2}\theta_j^{\mathrm{T}}\Sigma_{\text{prior}}(\gamma_j)^{-1}\theta_j - \frac{1}{2}\log\big(4\gamma_j^{32}\big) + \log\left(\frac{2}{\pi s\big(1 + (\gamma_j/s)^2\big)}\right) + c
-$$
-
-$$
-= \ell(\theta_j) - \frac{\alpha_j^2}{8} - \frac{1}{2}\sum_{i=1}^4\beta_{i,jj}^2 - \frac{1}{2\gamma_j^2}\sum_{k \ne j}\sum_{i=1}^4\beta_{i,jk}^2 - \log\left(\gamma_j^{16}\left(1 + \frac{\gamma_j^2}{s^2}\right)\right) + c
+\big) + \log\big(p(\gamma_j)\big) + c \\
+&= \ell(\theta_j) - \frac{1}{2}\theta_j^{\mathrm{T}}\Sigma_{\text{prior}}(\gamma_j)^{-1}\theta_j - \frac{1}{2}\log\big(4\gamma_j^{32}\big) + \log\left(\frac{2}{\pi s\big(1 + (\gamma_j/s)^2\big)}\right) + c \\
+&= \ell(\theta_j) - \frac{\alpha_j^2}{8} - \frac{1}{2}\sum_{i=1}^4\beta_{i,jj}^2 - \frac{1}{2\gamma_j^2}\sum_{k \ne j}\sum_{i=1}^4\beta_{i,jk}^2 - \log\left(\gamma_j^{16}\left(1 + \frac{\gamma_j^2}{s^2}\right)\right) + c
+\end{aligned}
 $$
 
 for some constant $c$.
